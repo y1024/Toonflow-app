@@ -36,9 +36,11 @@ export default router.post(
       resolution: config.resolution,
       duration: config.duration,
       prompt: config.prompt || "",
+      dialogue: config.dialogue ?? "",
+      narration: config.narration ?? "",
       selectedResultId: config.selectedResultId,
       createdAt: config.createTime ? new Date(config.createTime).toISOString() : new Date().toISOString(),
-      audioEnabled:!!config.audioEnabled
+      audioEnabled: !!config.audioEnabled,
     }));
 
     res.status(200).send(success(result));

@@ -119,8 +119,8 @@ async function urlToBase64(imageUrl: string): Promise<string> {
   const base64 = Buffer.from(response.data, "binary").toString("base64");
   return `data:${contentType};base64,${base64}`;
 }
-// 生成单个分镜提示
-async function generateSingleVideoPrompt({
+// 生成单个分镜提示（供 keepStoryboard 等复用）
+export async function generateSingleVideoPrompt({
   scriptText,
   storyboardPrompt,
   ossPath,
@@ -215,16 +215,19 @@ export default router.post(
         ossPath: src,
       });
 
-      // 写回资产表，方便前端从通用资产接口直接读取视频提示词、对白与第三方叙述
-      await u
-        .db("t_assets")
-        .where({ id: Number(id), projectId })
-        .update({
-          videoPrompt: result.content || "",
-          duration: String(result.time),
-          dialogue: result.dialogue ?? "",
-          narration: result.narration ?? "",
-        });
+      // 仅当 id 为有效数字且对应资产存在时写回资产表（导出流程中 id 可能为前端 cell 的 uuid，此时只返回结果供前端保存时带入）
+      const assetId = Number(id);
+      if (!Number.isNaN(assetId)) {
+        const existing = await u.db("t_assets").where({ id: assetId, projectId }).first();
+        if (existing) {
+          await u.db("t_assets").where({ id: assetId, projectId }).update({
+            videoPrompt: result.content || "",
+            duration: String(result.time),
+            dialogue: result.dialogue ?? "",
+            narration: result.narration ?? "",
+          });
+        }
+      }
 
       res.status(200).send(
         success({

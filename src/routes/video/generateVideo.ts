@@ -102,7 +102,7 @@ export default router.post(
     const storyboardImgs = fileUrl.map((path: string) => getPathname(path));
     const savePath = `/${projectId}/video/${uuidv4()}.mp4`;
 
-    // 先插入记录，state 默认为 0
+    // 优先使用配置中保存的 dialogue/narration，若无则从分镜资产表按 filePath 汇总
     const [videoId] = await u.db("t_video").insert({
       scriptId,
       configId: configId || null, // 关联的视频配置ID
@@ -118,23 +118,34 @@ export default router.post(
     // 立即返回，不等待视频生成
     res.status(200).send(success({ id: videoId, configId: configId || null }));
 
-    // 分镜对话与角色音色：用于生成视频时按角色统一音色（若厂商 API 支持）
-    const pathnameSet = new Set(storyboardImgs);
-    const storyboardAssets = await u
-      .db("t_assets")
-      .where({ scriptId, type: "分镜" })
-      .select("dialogue", "narration", "filePath");
-    const dialogueParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
-      .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
-      .map((a) => a.dialogue)
-      .filter((d): d is string => !!d && d.trim() !== "");
-    const dialogue = dialogueParts.length > 0 ? dialogueParts.join("\n") : undefined;
-
-    const narrationParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
-      .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
-      .map((a) => a.narration)
-      .filter((n): n is string => !!n && n.trim() !== "");
-    const narration = narrationParts.length > 0 ? narrationParts.join("\n") : undefined;
+    // 分镜对话与角色音色：优先用配置中的 dialogue/narration，否则从分镜资产按 filePath 汇总
+    let dialogue: string | undefined;
+    let narration: string | undefined;
+    const configDialogue = (configData as any).dialogue;
+    const configNarration = (configData as any).narration;
+    if (configDialogue && String(configDialogue).trim() !== "") {
+      dialogue = String(configDialogue).trim();
+    }
+    if (configNarration && String(configNarration).trim() !== "") {
+      narration = String(configNarration).trim();
+    }
+    if (dialogue === undefined || narration === undefined) {
+      const pathnameSet = new Set(storyboardImgs);
+      const storyboardAssets = await u
+        .db("t_assets")
+        .where({ scriptId, type: "分镜" })
+        .select("dialogue", "narration", "filePath");
+      const dialogueParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
+        .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
+        .map((a) => a.dialogue)
+        .filter((d): d is string => !!d && d.trim() !== "");
+      if (dialogue === undefined) dialogue = dialogueParts.length > 0 ? dialogueParts.join("\n") : undefined;
+      const narrationParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
+        .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
+        .map((a) => a.narration)
+        .filter((n): n is string => !!n && n.trim() !== "");
+      if (narration === undefined) narration = narrationParts.length > 0 ? narrationParts.join("\n") : undefined;
+    }
 
     const roleAssets = await u.db("t_assets").where({ projectId, type: "角色" }).select("name", "voiceId");
     const characterVoiceMap: Record<string, string> = {};

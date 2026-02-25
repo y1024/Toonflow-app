@@ -37,9 +37,11 @@ export default router.post(
     duration: z.number(),
     prompt: z.string().optional(),
     audioEnabled: z.boolean(),
+    dialogue: z.string().optional(),
+    narration: z.string().optional(),
   }),
   async (req, res) => {
-    const { scriptId, projectId, configId, mode, startFrame, endFrame, images, resolution, duration, prompt, audioEnabled } = req.body;
+    const { scriptId, projectId, configId, mode, startFrame, endFrame, images, resolution, duration, prompt, audioEnabled, dialogue, narration } = req.body;
 
     // 生成新ID
     const maxIdResult: any = await u.db("t_videoConfig").max("id as maxId").first();
@@ -61,6 +63,8 @@ export default router.post(
       resolution,
       duration,
       prompt: prompt || "",
+      dialogue: dialogue ?? "",
+      narration: narration ?? "",
       selectedResultId: null,
       createTime: now,
       updateTime: now,
@@ -84,6 +88,8 @@ export default router.post(
           resolution,
           duration,
           prompt: prompt || "",
+          dialogue: dialogue ?? "",
+          narration: narration ?? "",
           selectedResultId: null,
           createdAt: new Date(now).toISOString(),
           audioEnabled: audioEnabled,

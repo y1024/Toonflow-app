@@ -224,6 +224,8 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.text("resolution"); // 分辨率
         table.integer("duration"); // 时长
         table.text("prompt"); // 提示词
+        table.text("dialogue"); // 人物对话（格式「角色名：台词」）
+        table.text("narration"); // 第三方视角叙述
         table.integer("selectedResultId"); // 选中的生成结果ID
         table.integer("createTime"); // 创建时间
         table.integer("updateTime"); // 更新时间

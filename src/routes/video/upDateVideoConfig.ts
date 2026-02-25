@@ -18,9 +18,11 @@ export default router.post(
     endFrame: z.object().nullable().optional(),
     images: z.array(z.object()).optional(),
     audioEnabled: z.boolean().optional(),
+    dialogue: z.string().optional(),
+    narration: z.string().optional(),
   }),
   async (req, res) => {
-    const { id, resolution, duration, prompt, selectedResultId, startFrame, endFrame, images, audioEnabled } = req.body;
+    const { id, resolution, duration, prompt, selectedResultId, startFrame, endFrame, images, audioEnabled, dialogue, narration } = req.body;
 
     // 检查配置是否存在
     const existingConfig = await u.db("t_videoConfig").where({ id }).first();
@@ -57,6 +59,12 @@ export default router.post(
     if (audioEnabled !== undefined) {
       updateData.audioEnabled = audioEnabled;
     }
+    if (dialogue !== undefined) {
+      updateData.dialogue = dialogue;
+    }
+    if (narration !== undefined) {
+      updateData.narration = narration;
+    }
     // 更新数据
     await u.db("t_videoConfig").where({ id }).update(updateData);
 
@@ -78,6 +86,8 @@ export default router.post(
             resolution: updatedConfig.resolution,
             duration: updatedConfig.duration,
             prompt: updatedConfig.prompt,
+            dialogue: (updatedConfig as any).dialogue ?? "",
+            narration: (updatedConfig as any).narration ?? "",
             selectedResultId: updatedConfig.selectedResultId,
             createdAt: new Date(updatedConfig.createTime!).toISOString(),
             audioEnabled: updatedConfig.audioEnabled,
