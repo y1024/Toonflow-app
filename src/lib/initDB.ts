@@ -101,6 +101,7 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
         table.text("type");
         table.text("artStyle");
         table.text("videoRatio");
+        table.text("visualStyle");
         table.integer("createTime");
         table.integer("userId");
         table.primary(["id"]);

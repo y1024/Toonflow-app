@@ -56,9 +56,11 @@ export default router.post(
     const { assetsId, projectId, type, name, describe } = req.body;
     const describeStr = describe ?? "";
 
-    //获取风格
-    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro").first();
+    //获取风格与视觉类型
+    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro", "visualStyle").first();
     if (!project) return res.status(500).send(success({ message: "项目为空" }));
+    const visualStyleLabel =
+      project.visualStyle === "realistic" ? "现实" : project.visualStyle === "anime" ? "漫剧" : project.visualStyle === "other" ? "其他" : null;
 
     const allOutlineDataList: { data: string }[] = await u.db("t_outline").where("projectId", projectId).select("data");
 
@@ -108,7 +110,7 @@ export default router.post(
       请根据以下参数生成角色标准四视图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}
+      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
@@ -132,7 +134,7 @@ export default router.post(
       请根据以下参数生成场景图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}
+      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
@@ -155,7 +157,7 @@ export default router.post(
       请根据以下参数生成道具图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}
+      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
@@ -174,7 +176,7 @@ export default router.post(
       请根据以下参数生成分镜图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}
+      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
   

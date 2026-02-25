@@ -531,6 +531,15 @@ ${sections.join("\n\n")}
         .filter(Boolean)
         .join("\n") || "无";
 
+    const visualStyleLabel =
+      projectInfo?.visualStyle === "realistic"
+        ? "现实"
+        : projectInfo?.visualStyle === "anime"
+          ? "漫剧"
+          : projectInfo?.visualStyle === "other"
+            ? "其他"
+            : "未设置（可提示用户选择）";
+
     return `<环境信息>
 项目ID: ${this.projectId}
 系统时间: ${new Date().toLocaleString()}
@@ -540,6 +549,7 @@ ${sections.join("\n\n")}
 类型: ${projectInfo?.type || "未知"}
 风格: ${projectInfo?.artStyle || "未知"}
 视频比例: ${projectInfo?.videoRatio || "未知"}
+视觉类型: ${visualStyleLabel}（用于分镜/资产生成时的风格统一：现实=写实真人风，漫剧=动漫二次元风，其他=由风格字段决定）
 
 资产列表:
 ${assetList}

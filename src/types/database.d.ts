@@ -1,4 +1,4 @@
-// @db-hash 5081428094f499999825b83761eacc63
+// @db-hash aba32aab0a9ce73a794391fee9d25d58
 //该文件由脚本自动生成，请勿手动修改
 
 export interface t_aiModelMap {
@@ -79,6 +79,7 @@ export interface t_project {
   'type'?: string | null;
   'userId'?: number | null;
   'videoRatio'?: string | null;
+  'visualStyle'?: string | null;
 }
 export interface t_prompts {
   'code'?: string | null;

@@ -39,9 +39,11 @@ export default router.post(
   async (req, res) => {
     const { id, type, projectId, base64, prompt, name } = req.body;
 
-    //获取风格
-    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro").first();
+    //获取风格与视觉类型
+    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro", "visualStyle").first();
     if (!project) return res.status(500).send(success({ message: "项目为空" }));
+    const visualStyleLabel =
+      project.visualStyle === "realistic" ? "现实" : project.visualStyle === "anime" ? "漫剧" : project.visualStyle === "other" ? "其他" : null;
 
     const promptsList = await u
       .db("t_prompts")
@@ -64,7 +66,7 @@ export default router.post(
     请根据以下参数生成角色标准四视图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}
+    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成，禁止与其它类型混用）` : ""}
 
     **角色设定：**
     - 名称:${name},
@@ -79,7 +81,7 @@ export default router.post(
     请根据以下参数生成标准场景图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}
+    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
 
     **场景设定：**
     - 名称:${name},
@@ -94,7 +96,7 @@ export default router.post(
       请根据以下参数生成标准道具图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}
+    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
 
     **道具设定：**
     - 名称:${name},
@@ -109,7 +111,7 @@ export default router.post(
       请根据以下参数生成标准分镜图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}
+    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
 
     **分镜设定：**
     - 名称:${name},

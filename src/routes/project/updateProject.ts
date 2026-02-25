@@ -14,15 +14,17 @@ export default router.post(
     type: z.string().optional().nullable(),
     artStyle: z.string().optional().nullable(),
     videoRatio: z.string().optional().nullable(),
+    visualStyle: z.enum(["realistic", "anime", "other"]).optional().nullable(),
   }),
   async (req, res) => {
-    const { id, intro, type, artStyle, videoRatio } = req.body;
+    const { id, intro, type, artStyle, videoRatio, visualStyle } = req.body;
 
     await u.db("t_project").where("id", id).update({
       intro,
       type,
       artStyle,
       videoRatio,
+      ...(visualStyle !== undefined && { visualStyle }),
     });
 
     res.status(200).send(success({ message: "修改成功" }));

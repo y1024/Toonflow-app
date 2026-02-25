@@ -215,6 +215,17 @@ export default router.post(
         ossPath: src,
       });
 
+      // 写回资产表，方便前端从通用资产接口直接读取视频提示词、对白与第三方叙述
+      await u
+        .db("t_assets")
+        .where({ id: Number(id), projectId })
+        .update({
+          videoPrompt: result.content || "",
+          duration: String(result.time),
+          dialogue: result.dialogue ?? "",
+          narration: result.narration ?? "",
+        });
+
       res.status(200).send(
         success({
           id,
