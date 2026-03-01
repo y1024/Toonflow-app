@@ -104,9 +104,6 @@ async function generateGridPrompt(options: GridPromptOptions): Promise<GridPromp
 
   if (!mainPrompts) return { prompt: errData, gridLayout: layout };
 
-  const styleUnityNote =
-    "\n⚠️ 风格统一：全片人物与画面必须统一为【风格】所指定的类型，禁止在同一分镜中混用动漫风格与写实风格；若为动漫则全部动漫，若为写实则全部写实。";
-
   const result = await u.ai.text.invoke(
     {
       messages: [
@@ -118,7 +115,7 @@ async function generateGridPrompt(options: GridPromptOptions): Promise<GridPromp
           role: "user",
           content: `请优化以下分镜提示词：\n\n【布局】${layout.cols}列×${layout.rows}行=${
             layout.totalCells
-          }格\n【比例】${aspectRatio}（${aspectRatioDesc}）\n【风格】${style}${styleUnityNote}\n${assetsSection}\n\n【原始内容】\n${gridPositions.join("\n")}`,
+          }格\n【比例】${aspectRatio}（${aspectRatioDesc}）\n【风格】${style}\n${assetsSection}\n\n【原始内容】\n${gridPositions.join("\n")}`,
         },
       ],
     },

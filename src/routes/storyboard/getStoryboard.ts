@@ -33,7 +33,6 @@ export default router.post(
         "segmentId",
         "shotIndex",
         "dialogue",
-        "narration",
       )
       .orderBy("segmentId", "asc")
       .orderBy("shotIndex", "asc");
@@ -76,7 +75,6 @@ export default router.post(
           shotIndex: item.shotIndex ?? 1,
           generateImg: imgArr,
           dialogue: item.dialogue ?? "",
-          narration: item.narration ?? "",
         };
       })
     );

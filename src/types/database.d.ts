@@ -1,6 +1,20 @@
 // @db-hash 0f9789bd5ad2eebd79bd502988efcb4e
 //该文件由脚本自动生成，请勿手动修改
 
+export interface _t_video_old_20260210 {
+  'aiConfigId'?: number | null;
+  'configId'?: number | null;
+  'filePath'?: string | null;
+  'firstFrame'?: string | null;
+  'id'?: number;
+  'model'?: string | null;
+  'prompt'?: string | null;
+  'resolution'?: string | null;
+  'scriptId'?: number | null;
+  'state'?: number | null;
+  'storyboardImgs'?: string | null;
+  'time'?: number | null;
+}
 export interface t_aiModelMap {
   'configId'?: number | null;
   'id'?: number;
@@ -86,7 +100,6 @@ export interface t_project {
   'type'?: string | null;
   'userId'?: number | null;
   'videoRatio'?: string | null;
-  'visualStyle'?: string | null;
 }
 export interface t_prompts {
   'code'?: string | null;
@@ -194,15 +207,6 @@ export interface t_videoConfig {
   'subtitleEnabled'?: number | null;
   'updateTime'?: number | null;
 }
-export interface t_videoModel {
-  'aspectRatio'?: string | null;
-  'audio'?: number | null;
-  'durationResolutionMap'?: string | null;
-  'id'?: number;
-  'manufacturer'?: string | null;
-  'model'?: string | null;
-  'type'?: string | null;
-}
 
 export interface DB {
   "t_aiModelMap": t_aiModelMap;
@@ -225,5 +229,4 @@ export interface DB {
   "t_video_chat": t_video_chat;
   "t_video_subtitle": t_video_subtitle;
   "t_videoConfig": t_videoConfig;
-  "t_videoModel": t_videoModel;
 }

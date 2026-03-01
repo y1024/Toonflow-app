@@ -39,11 +39,9 @@ export default router.post(
   async (req, res) => {
     const { id, type, projectId, base64, prompt, name } = req.body;
 
-    //获取风格与视觉类型
-    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro", "visualStyle").first();
+    //获取风格
+    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro").first();
     if (!project) return res.status(500).send(success({ message: "项目为空" }));
-    const visualStyleLabel =
-      project.visualStyle === "realistic" ? "现实" : project.visualStyle === "anime" ? "漫剧" : project.visualStyle === "other" ? "其他" : null;
 
     const promptsList = await u
       .db("t_prompts")
@@ -66,7 +64,7 @@ export default router.post(
     请根据以下参数生成角色标准四视图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成，禁止与其它类型混用）` : ""}
+    - 画风风格: ${project?.artStyle || "未指定"}
 
     **角色设定：**
     - 名称:${name},
@@ -81,7 +79,7 @@ export default router.post(
     请根据以下参数生成标准场景图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
+    - 画风风格: ${project?.artStyle || "未指定"}
 
     **场景设定：**
     - 名称:${name},
@@ -96,7 +94,7 @@ export default router.post(
       请根据以下参数生成标准道具图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
+    - 画风风格: ${project?.artStyle || "未指定"}
 
     **道具设定：**
     - 名称:${name},
@@ -111,7 +109,7 @@ export default router.post(
       请根据以下参数生成标准分镜图：
 
     **基础参数：**
-    - 画风风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n    - 视觉类型: ${visualStyleLabel}（请严格按此类型生成）` : ""}
+    - 画风风格: ${project?.artStyle || "未指定"}
 
     **分镜设定：**
     - 名称:${name},
@@ -180,7 +178,7 @@ export default router.post(
 
         return res.status(200).send(success({ path, assetsId: id }));
       } else {
-        return res.status(500).send("资产已被删除");
+        return res.status(500).send(error("资产已被删除"));
       }
     } catch (e) {
       await u.db("t_image").where("id", imageId).update({

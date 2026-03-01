@@ -23,7 +23,6 @@ export default router.post(
         segmentId: z.number(),
         shotIndex: z.number(),
         dialogue: z.string().optional().nullable(),
-        narration: z.string().optional().nullable(),
       })
     ),
   }),
@@ -35,7 +34,6 @@ export default router.post(
         ...item,
         filePath: new URL(item.filePath).pathname,
         dialogue: item.dialogue ?? "",
-        narration: item.narration ?? "",
       };
       // 导出流程中 id 可能为前端 cell 的 uuid，插入时由库表自增生成 id，故去掉非数字 id
       const idNum = Number(row.id);
@@ -44,7 +42,7 @@ export default router.post(
     });
     await u.db("t_assets").insert(list);
 
-    // 对未填写 videoPrompt/dialogue/narration 的新插入行，异步生成并回写（不阻塞响应）
+    // 对未填写 videoPrompt/dialogue的新插入行，异步生成并回写（不阻塞响应）
     const needGenerate = list.filter(
       (r: any) => (r.videoPrompt == null || String(r.videoPrompt).trim() === "") && r.filePath && r.prompt
     );
@@ -64,7 +62,7 @@ export default router.post(
         .orderBy("segmentId", "asc")
         .orderBy("shotIndex", "asc")
         .select("id", "filePath", "prompt");
-      Promise.all(
+      await Promise.all(
         insertedRows.map(async (row) => {
           if (row.id == null) return;
           try {
@@ -79,7 +77,6 @@ export default router.post(
               videoPrompt: result.content || "",
               duration: String(result.time),
               dialogue: result.dialogue ?? "",
-              narration: result.narration ?? "",
             });
           } catch (e) {
             console.error("keepStoryboard 异步生成视频提示词失败:", row.id, e);

@@ -17,12 +17,10 @@ export default router.post(
     prompt: z.string(),
     remark: z.string().optional().nullable(),
     episode: z.string().optional().nullable(),
-    voiceId: z.string().optional().nullable(),
     dialogue: z.string().optional().nullable(),
-    narration: z.string().optional().nullable(),
   }),
   async (req, res) => {
-    const { projectId, name, intro, type, prompt, remark, episode, scriptId, voiceId, dialogue, narration } = req.body;
+    const { projectId, name, intro, type, prompt, remark, episode, scriptId, dialogue } = req.body;
 
     await u.db("t_assets").insert({
       projectId,
@@ -33,9 +31,7 @@ export default router.post(
       remark,
       episode,
       scriptId,
-      ...(voiceId != null && voiceId !== "" && { voiceId }),
       ...(dialogue != null && { dialogue }),
-      ...(narration != null && { narration }),
     });
 
     res.status(200).send(success({ message: "新增资产成功" }));

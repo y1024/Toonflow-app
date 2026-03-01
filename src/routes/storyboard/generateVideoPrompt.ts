@@ -8,7 +8,7 @@ import axios from "axios";
 const router = express.Router();
 
 const prompt = `
-你是一名资深动画导演，擅长将静态分镜转化为简洁、专业、详尽的 Motion Prompt（视频生成动作提示）。你理解镜头语言、情绪节奏，能补充丰富但不重复静态元素，只突出变化与动态；同时，你也负责从第三方叙述视角解释当前镜头的场景与人物状态。
+你是一名资深动画导演，擅长将静态分镜转化为简洁、专业、详尽的 Motion Prompt（视频生成动作提示）。你理解镜头语言、情绪节奏，能补充丰富但不重复静态元素，只突出变化与动态。
 
 ## 任务
 你将接收用户输入的：  
@@ -72,10 +72,6 @@ const prompt = `
 - **若有对白**：必须标明**说话人角色名**（与剧本/项目内角色名称一致），格式为 **「角色名：台词」**；多句用换行或分号分隔。
 - 示例：\`王林：你怎么来了？\`、\`李慕婉：我来找你。\` 或 \`王林：你怎么来了？\n李慕婉：我来找你。\`
 
-### 6. 第三方视角叙述（可选）
-- 从**第三人称旁观视角**，根据剧本内容对当前镜头进行简要叙述，解释场景、人物状态、情绪氛围与关键信息（例如地点、时间、人物关系等）。
-- 语气应客观、冷静，不使用第一人称或第二人称。
-- 若本镜头无需额外叙述或剧本无相关信息，则 narration 填空字符串 ""。
 
 ---
 
@@ -88,7 +84,6 @@ const prompt = `
   "name": "字符串（2-6字，概括镜头动态/情绪）",
   "content": "字符串（80-150字，首句为画面类型，充分描述动态细节）",
   "dialogue": "字符串（本镜头人物对话，格式「角色名：台词」，无则空字符串）",
-  "narration": "字符串（本镜头第三方视角叙述，根据剧本解释场景与人物，无则空字符串）"
 }
 
 ### 字段说明
@@ -128,7 +123,7 @@ export async function generateSingleVideoPrompt({
   scriptText: string;
   storyboardPrompt: string;
   ossPath: string;
-}): Promise<{ content: string; time: number; name: string; dialogue: string; narration: string }> {
+}): Promise<{ content: string; time: number; name: string; dialogue: string }> {
   const messages: any[] = [
     {
       role: "system",
@@ -160,7 +155,6 @@ export async function generateSingleVideoPrompt({
           content: z.string().describe("提示词内容"),
           name: z.string().describe("分镜名称"),
           dialogue: z.string().describe("本镜头人物对话，格式「角色名：台词」，无则空字符串"),
-          narration: z.string().describe("本镜头第三方视角叙述，根据剧本解释场景与人物，无则空字符串"),
         },
       },
       apiConfig,
@@ -171,19 +165,17 @@ export async function generateSingleVideoPrompt({
     }
 
     const dialogue = (result as any).dialogue;
-    const narration = (result as any).narration;
     if (
       !result.content ||
       result.time === undefined ||
       !result.name ||
-      typeof dialogue !== "string" ||
-      typeof narration !== "string"
+      typeof dialogue !== "string" 
     ) {
       console.error("AI 返回格式错误:", result);
       throw new Error("AI 返回格式错误");
     }
 
-    return { ...result, dialogue, narration };
+    return { ...result, dialogue };
   } catch (err: any) {
     console.error("generateSingleVideoPrompt 调用失败:", err?.message || err);
     throw new Error(`生成视频提示词失败: ${err?.message || "未知错误"}`);
@@ -224,7 +216,6 @@ export default router.post(
             videoPrompt: result.content || "",
             duration: String(result.time),
             dialogue: result.dialogue ?? "",
-            narration: result.narration ?? "",
           });
         }
       }
@@ -241,7 +232,6 @@ export default router.post(
           scriptId,
           src,
           dialogue: result.dialogue ?? "",
-          narration: result.narration ?? "",
         }),
       );
     } catch (err: any) {

@@ -102,7 +102,7 @@ export default router.post(
     const storyboardImgs = fileUrl.map((path: string) => getPathname(path));
     const savePath = `/${projectId}/video/${uuidv4()}.mp4`;
 
-    // 优先使用配置中保存的 dialogue/narration，若无则从分镜资产表按 filePath 汇总
+    // 优先使用配置中保存的 dialogue filePath 汇总
     const [videoId] = await u.db("t_video").insert({
       scriptId,
       configId: configId || null, // 关联的视频配置ID
@@ -118,39 +118,23 @@ export default router.post(
     // 立即返回，不等待视频生成
     res.status(200).send(success({ id: videoId, configId: configId || null }));
 
-    // 分镜对话与角色音色：优先用配置中的 dialogue/narration，否则从分镜资产按 filePath 汇总
+    // 分镜对话：优先用配置中的 dialogue，否则从分镜资产按 filePath 汇总
     let dialogue: string | undefined;
-    let narration: string | undefined;
     const configDialogue = (configData as any).dialogue;
-    const configNarration = (configData as any).narration;
     if (configDialogue && String(configDialogue).trim() !== "") {
       dialogue = String(configDialogue).trim();
     }
-    if (configNarration && String(configNarration).trim() !== "") {
-      narration = String(configNarration).trim();
-    }
-    if (dialogue === undefined || narration === undefined) {
+    if (dialogue === undefined) {
       const pathnameSet = new Set(storyboardImgs);
       const storyboardAssets = await u
         .db("t_assets")
         .where({ scriptId, type: "分镜" })
-        .select("dialogue", "narration", "filePath");
-      const dialogueParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
+        .select("dialogue","filePath");
+      const dialogueParts = (storyboardAssets as { dialogue?: string | null; filePath?: string | null }[])
         .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
         .map((a) => a.dialogue)
         .filter((d): d is string => !!d && d.trim() !== "");
       if (dialogue === undefined) dialogue = dialogueParts.length > 0 ? dialogueParts.join("\n") : undefined;
-      const narrationParts = (storyboardAssets as { dialogue?: string | null; narration?: string | null; filePath?: string | null }[])
-        .filter((a) => a.filePath && (pathnameSet.has(a.filePath) || pathnameSet.has(a.filePath!.replace(/^\//, ""))))
-        .map((a) => a.narration)
-        .filter((n): n is string => !!n && n.trim() !== "");
-      if (narration === undefined) narration = narrationParts.length > 0 ? narrationParts.join("\n") : undefined;
-    }
-
-    const roleAssets = await u.db("t_assets").where({ projectId, type: "角色" }).select("name", "voiceId");
-    const characterVoiceMap: Record<string, string> = {};
-    for (const r of roleAssets as { name?: string | null; voiceId?: string | null }[]) {
-      if (r.name && r.voiceId && String(r.voiceId).trim() !== "") characterVoiceMap[r.name] = String(r.voiceId);
     }
 
     // 异步生成视频
@@ -165,9 +149,7 @@ export default router.post(
       audioEnabled,
       aiConfigData,
       dialogue,
-      Object.keys(characterVoiceMap).length > 0 ? characterVoiceMap : undefined,
-      narration,
-        mode,
+      mode,
     );
   },
 );
@@ -184,9 +166,7 @@ async function generateVideoAsync(
   audioEnabled: boolean,
   aiConfigData: t_config,
   dialogue?: string,
-  characterVoiceMap?: Record<string, string>,
-  narration?: string,
-  mode: string,
+  mode?: string,
 ) {
   try {
     const projectData = await u.db("t_project").where("id", projectId).select("artStyle", "videoRatio").first();
@@ -215,15 +195,7 @@ async function generateVideoAsync(
     if (dialogue && dialogue.trim()) {
       extraSections.push(`【人物对话】\n${dialogue.trim()}`);
     }
-    if (narration && narration.trim()) {
-      extraSections.push(`【第三方视角叙述】\n${narration.trim()}`);
-    }
-    if (characterVoiceMap && Object.keys(characterVoiceMap).length > 0) {
-      const voiceLines = Object.entries(characterVoiceMap)
-        .map(([name, voiceId]) => `${name} -> voiceId: ${voiceId}`)
-        .join("；");
-      extraSections.push(`【角色音色映射】\n${voiceLines}`);
-    }
+
     if (extraSections.length > 0) {
       finalPrompt = `${prompt}\n\n${extraSections.join("\n\n")}`;
     }

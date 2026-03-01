@@ -220,8 +220,7 @@ ${sections.join("\n\n")}
    */
   addShots = tool({
     title: "addShots",
-    description:
-      "添加新的分镜（仅保存镜头提示词文字）。每个分镜有独立ID，包含多个镜头（每个镜头对应一个提示词）。如果片段已存在分镜会跳过。当用户说「生成分镜提示词」「只生成提示词」「先出提示词」时，只调用本工具（及 getSegments/getAssets 等），不要调用 generateShotImage。",
+    description: "添加新的分镜。每个分镜有独立ID，包含多个镜头（每个镜头对应一个提示词）。如果片段已存在分镜会跳过",
     inputSchema: z.object({
       shots: z
         .array(
@@ -269,9 +268,6 @@ ${sections.join("\n\n")}
       this.log("添加分镜", `新增: [${addedInfo}], 跳过片段: [${skipped.join(", ")}]`);
       this.emit("shotsUpdated", this.shots);
 
-      if (skipped.length > 0 && added.length === 0) {
-        return `所选片段（${skipped.join(", ")}）均已存在分镜，未新增。若需修改某分镜的镜头提示词，请说明分镜编号，例如：“更新分镜3的提示词”。当前共 ${this.shots.length} 个分镜`;
-      }
       if (skipped.length) {
         return `已添加${addedInfo}；片段 ${skipped.join(", ")} 已存在分镜被跳过。当前共 ${this.shots.length} 个分镜`;
       }
@@ -357,7 +353,7 @@ ${sections.join("\n\n")}
   generateShotImage = tool({
     title: "generateShotImage",
     description:
-      "为指定分镜生成分镜图（调用画图接口出图）。每个分镜会根据其所有提示词生成一张完整宫格图，然后自动分割为单格图片。仅当用户明确要求「生成分镜图」「出图」「画图」「生成图片」时调用；用户仅说「生成分镜提示词」「只生成提示词」「先出提示词」时禁止调用本工具。通过分镜ID指定，整个分镜是一个完整的生成单元。",
+      "为指定分镜生成分镜图。每个分镜会根据其所有提示词生成一张完整宫格图，然后自动分割为单格图片。通过分镜ID指定，不需要指定具体格子，整个分镜是一个完整的生成单元",
     inputSchema: z.object({
       shotIds: z.array(z.number()).describe("要生成分镜图的分镜ID数组"),
     }),
@@ -534,15 +530,6 @@ ${sections.join("\n\n")}
         .filter(Boolean)
         .join("\n") || "无";
 
-    const visualStyleLabel =
-      projectInfo?.visualStyle === "realistic"
-        ? "现实"
-        : projectInfo?.visualStyle === "anime"
-          ? "漫剧"
-          : projectInfo?.visualStyle === "other"
-            ? "其他"
-            : "未设置（可提示用户选择）";
-
     return `<环境信息>
 项目ID: ${this.projectId}
 系统时间: ${new Date().toLocaleString()}
@@ -552,7 +539,6 @@ ${sections.join("\n\n")}
 类型: ${projectInfo?.type || "未知"}
 风格: ${projectInfo?.artStyle || "未知"}
 视频比例: ${projectInfo?.videoRatio || "未知"}
-视觉类型: ${visualStyleLabel}（用于分镜/资产生成时的风格统一：现实=写实真人风，漫剧=动漫二次元风，其他=由风格字段决定）
 
 资产列表:
 ${assetList}
@@ -712,12 +698,10 @@ ${task}
     const promptConfig = await u.getPromptAi("storyboardAgent");
 
     const mainPrompts = prompts?.customValue || prompts?.defaultValue || "不论用户说什么，请直接输出Agent配置异常";
-    const promptImageRule =
-      "\n\n## 重要区分（必须遵守）\n- 用户仅说「生成分镜提示词」「只生成提示词」「先出提示词」时：只调用 shotAgent（或 addShots/updateShots），**禁止**调用 generateShotImage。\n- 仅当用户明确说「生成分镜图」「出图」「画图」「生成图片」时：才调用 generateShotImage。";
 
     const { fullStream } = await u.ai.text.stream(
       {
-        system: `${envContext}\n${mainPrompts}${promptImageRule}`,
+        system: `${envContext}\n${mainPrompts}`,
         tools: this.getAllTools(),
         messages: this.history,
         maxStep: 100,

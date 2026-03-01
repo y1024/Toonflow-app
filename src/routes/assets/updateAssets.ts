@@ -17,12 +17,10 @@ export default router.post(
     videoPrompt: z.string().optional().nullable(),
     remark: z.string().optional().nullable(),
     duration: z.number().optional().nullable(),
-    voiceId: z.string().optional().nullable(),
     dialogue: z.string().optional().nullable(),
-    narration: z.string().optional().nullable(),
   }),
   async (req, res) => {
-    const { id, name, intro, type, prompt, remark, duration, videoPrompt, voiceId, dialogue, narration } = req.body;
+    const { id, name, intro, type, prompt, remark, duration, videoPrompt, dialogue } = req.body;
 
     const updateData: Record<string, any> = {
       name,
@@ -33,9 +31,7 @@ export default router.post(
       videoPrompt,
     };
     if (duration !== undefined) updateData.duration = duration == null ? null : String(duration);
-    if (voiceId !== undefined) updateData.voiceId = voiceId === "" ? null : voiceId;
-    if (dialogue !== undefined) updateData.dialogue = dialogue ?? "";
-    if (narration !== undefined) updateData.narration = narration ?? "";
+    if (dialogue !== undefined) updateData.dialogue = dialogue;
 
     await u
       .db("t_assets")

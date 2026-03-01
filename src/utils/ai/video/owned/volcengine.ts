@@ -38,7 +38,9 @@ export default async (input: VideoConfig, config: AIConfig) => {
   if (input?.audio) {
     requestBody.generate_audio = input.audio ?? false;
   }
-  // input.dialogue 与 input.characterVoiceMap 已由上游传入，供后续火山方舟支持按角色音色时在请求体中携带
+  if (input?.dialogue) {
+    requestBody.dialogue = input.dialogue;
+  }
   // 创建视频生成任务
   const createResponse = await axios.post(baseUrl, requestBody, {
     headers: {

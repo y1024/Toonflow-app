@@ -12,7 +12,6 @@ interface Storyboard {
   videoPrompt: string;
   duration: number;
   dialogue: string;
-  narration: string;
 }
 interface StoryboardList {
   id: number;
@@ -29,7 +28,6 @@ interface RawRow {
   videoPrompt: string | null;
   duration: number | null;
   dialogue: string | null;
-  narration: string | null;
 }
 
 // 获取视频分镜
@@ -56,7 +54,6 @@ export default router.post(
         "t_assets.prompt",
         "t_assets.duration",
         "t_assets.dialogue",
-        "t_assets.narration",
       ]);
 
     // 分组整理
@@ -82,7 +79,6 @@ export default router.post(
           videoPrompt: row.videoPrompt ?? "",
           duration: row.duration ?? 0,
           dialogue: row.dialogue ?? "",
-          narration: row.narration ?? "",
         });
       }
     }

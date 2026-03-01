@@ -50,17 +50,14 @@ export default router.post(
     projectId: zod.number(),
     type: zod.string(),
     name: zod.string(),
-    describe: zod.string().optional().nullable(),
+    describe: zod.string(),
   }),
   async (req, res) => {
     const { assetsId, projectId, type, name, describe } = req.body;
-    const describeStr = describe ?? "";
 
-    //获取风格与视觉类型
-    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro", "visualStyle").first();
+    //获取风格
+    const project = await u.db("t_project").where("id", projectId).select("artStyle", "type", "intro").first();
     if (!project) return res.status(500).send(success({ message: "项目为空" }));
-    const visualStyleLabel =
-      project.visualStyle === "realistic" ? "现实" : project.visualStyle === "anime" ? "漫剧" : project.visualStyle === "other" ? "其他" : null;
 
     const allOutlineDataList: { data: string }[] = await u.db("t_outline").where("projectId", projectId).select("data");
 
@@ -110,14 +107,14 @@ export default router.post(
       请根据以下参数生成角色标准四视图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
+      - 风格: ${project?.artStyle || "未指定"}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
   
       **角色设定：**
       - 角色名称:${name},
-      - 角色描述:${describeStr},
+      - 角色描述:${describe},
   
       请严格按照系统规范生成人物角色四视图提示词。
   
@@ -134,14 +131,14 @@ export default router.post(
       请根据以下参数生成场景图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
+      - 风格: ${project?.artStyle || "未指定"}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
   
       **场景设定：**
       - 场景名称:${name},
-      - 场景描述:${describeStr},
+      - 场景描述:${describe},
   
       请严格按照系统规范生成场景图提示词。
   
@@ -157,14 +154,14 @@ export default router.post(
       请根据以下参数生成道具图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
+      - 风格: ${project?.artStyle || "未指定"}
       - 小说原文：${results || "未提供"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
   
       **道具设定：**
       - 道具名称:${name},
-      - 道具描述:${describeStr},
+      - 道具描述:${describe},
   
       请严格按照系统规范生成道具图提示词。
   
@@ -176,13 +173,13 @@ export default router.post(
       请根据以下参数生成分镜图提示词：
   
       **基础参数：**
-      - 风格: ${project?.artStyle || "未指定"}${visualStyleLabel ? `\n      - 视觉类型: ${visualStyleLabel}（生成内容须符合此类型）` : ""}
+      - 风格: ${project?.artStyle || "未指定"}
       - 小说类型: ${project?.type || "未指定"}
       - 小说背景: ${project?.intro || "未指定"}
   
       **分镜设定：**
       - 分镜名称:${name},
-      - 分镜描述:${describeStr},
+      - 分镜描述:${describe},
   
       请严格按照系统规范生成分镜图提示词。
   
