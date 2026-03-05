@@ -219,7 +219,9 @@ export default async (knex: Knex, forceInit: boolean = false): Promise<void> => 
       name: "o_script",
       builder: (table) => {
         table.integer("id").notNullable();
-        table.string("name");
+        table.text("name");
+        table.text("content");
+        table.integer("projectId");
         table.integer("createTime");
         table.primary(["id"]);
         table.unique(["id"]);

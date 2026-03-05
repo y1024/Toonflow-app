@@ -1,4 +1,4 @@
-// @routes-hash 666c123ce474c8e5d0e930acd6c9be9c
+// @routes-hash 9d731e20672e7e7da8e1f6afe4b056ea
 import { Express } from "express";
 
 import route1 from "./routes/artStyle/getArtStyle";
@@ -15,8 +15,11 @@ import route11 from "./routes/project/getProject";
 import route12 from "./routes/project/getProjectCount";
 import route13 from "./routes/project/getSingleProject";
 import route14 from "./routes/project/updateProject";
-import route15 from "./routes/user/getUser";
-import route16 from "./routes/user/saveUser";
+import route15 from "./routes/script/addScript";
+import route16 from "./routes/script/getScrptApi";
+import route17 from "./routes/script/updateScript";
+import route18 from "./routes/user/getUser";
+import route19 from "./routes/user/saveUser";
 
 export default async (app: Express) => {
   app.use("/artStyle/getArtStyle", route1);
@@ -33,6 +36,9 @@ export default async (app: Express) => {
   app.use("/project/getProjectCount", route12);
   app.use("/project/getSingleProject", route13);
   app.use("/project/updateProject", route14);
-  app.use("/user/getUser", route15);
-  app.use("/user/saveUser", route16);
+  app.use("/script/addScript", route15);
+  app.use("/script/getScrptApi", route16);
+  app.use("/script/updateScript", route17);
+  app.use("/user/getUser", route18);
+  app.use("/user/saveUser", route19);
 }

@@ -1,4 +1,4 @@
-// @db-hash ab4a22cd977ccd6980edae6c71edc6e8
+// @db-hash 175d9f3b78c74a95ceef6c26cdfda844
 //该文件由脚本自动生成，请勿手动修改
 
 export interface o_agentDeploy {
@@ -78,9 +78,11 @@ export interface o_prompt {
   'startTime'?: number | null;
 }
 export interface o_script {
+  'content'?: string | null;
   'createTime'?: number | null;
   'id'?: number;
   'name'?: string | null;
+  'projectId'?: number | null;
 }
 export interface o_scriptAssets {
   'createTime'?: number | null;
