@@ -1,4 +1,4 @@
-// @routes-hash 9d731e20672e7e7da8e1f6afe4b056ea
+// @routes-hash 22a03fdc340a80068ecae4b50fddad41
 import { Express } from "express";
 
 import route1 from "./routes/artStyle/getArtStyle";
@@ -18,8 +18,11 @@ import route14 from "./routes/project/updateProject";
 import route15 from "./routes/script/addScript";
 import route16 from "./routes/script/getScrptApi";
 import route17 from "./routes/script/updateScript";
-import route18 from "./routes/user/getUser";
-import route19 from "./routes/user/saveUser";
+import route18 from "./routes/task/getMyTaskApi";
+import route19 from "./routes/task/getTaskCategories";
+import route20 from "./routes/task/taskDetails";
+import route21 from "./routes/user/getUser";
+import route22 from "./routes/user/saveUser";
 
 export default async (app: Express) => {
   app.use("/artStyle/getArtStyle", route1);
@@ -39,6 +42,9 @@ export default async (app: Express) => {
   app.use("/script/addScript", route15);
   app.use("/script/getScrptApi", route16);
   app.use("/script/updateScript", route17);
-  app.use("/user/getUser", route18);
-  app.use("/user/saveUser", route19);
+  app.use("/task/getMyTaskApi", route18);
+  app.use("/task/getTaskCategories", route19);
+  app.use("/task/taskDetails", route20);
+  app.use("/user/getUser", route21);
+  app.use("/user/saveUser", route22);
 }
